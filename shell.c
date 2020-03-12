@@ -12,7 +12,7 @@ int shellFind(char **args)
     // 3. A successful execvp never returns, while a failed execvp returns -1
     // 4. Print some kind of error message if it returns -1
     // 5. return 1 to the caller of shellFind if execvp fails to allow loop to continue
-    int result = execvp("shellPrograms/find", args);
+    int result = execvp("/home/lsj/shell/shellPrograms/find", args);
     if (result == -1)
     {
         printf("Faild to execute find\n");
@@ -33,7 +33,7 @@ int shellDisplayFile(char **args)
     // 3. A successful execvp never returns, while a failed execvp returns -1
     // 4. Print some kind of error message if it returns -1
     // 5. return 1 to the caller of shellDisplayFile if execvp fails to allow loop to continue
-    int result = execvp("shellPrograms/display", args);
+    int result = execvp("/home/lsj/shell/shellPrograms/display", args);
     if (result == -1)
     {
         printf("Faild to execute display\n");
@@ -54,7 +54,7 @@ int shellListDirAll(char **args)
     // 3. A successful execvp never returns, while a failed execvp returns -1
     // 4. Print some kind of error message if it returns -1
     // 5. return 1 to the caller of shellListDirAll if execvp fails to allow loop to continue
-    int result = execvp("shellPrograms/listdirall", args);
+    int result = execvp("/home/lsj/shell/shellPrograms/listdirall", args);
     if (result == -1)
     {
         printf("Faild to execute listdirall\n");
@@ -76,7 +76,7 @@ int shellListDir(char **args)
     // 3. A successful execvp never returns, while a failed execvp returns -1
     // 4. Print some kind of error message if it returns -1
     // 5. return 1 to the caller of shellListDir
-    int result = execvp("shellPrograms/listdir", args);
+    int result = execvp("/home/lsj/shell/shellPrograms/listdir", args);
     if (result == -1)
     {
         printf("Faild to execute listdir\n");
@@ -98,7 +98,7 @@ int shellCountLine(char **args)
     // 3. A successful execvp never returns, while a failed execvp returns -1
     // 4. Print some kind of error message if it returns -1
     // 5. return 1 to the caller of shellCountLine if execvp fails to allow loop to continue
-    int result = execvp("shellPrograms/countline", args);
+    int result = execvp("/home/lsj/shell/shellPrograms/countline", args);
     if (result == -1)
     {
         printf("Faild to execute countline\n");
@@ -119,7 +119,7 @@ int shellSummond(char **args)
     // 3. A successful execvp never returns, while a failed execvp returns -1
     // 4. Print some kind of error message if it returns -1
     // 5. return 1 to the caller of shellDaemonize if execvp fails to allow loop to continue
-    int result = execvp("shellPrograms/summond", args);
+    int result = execvp("/home/lsj/shell/shellPrograms/summond", args);
     if (result == -1)
     {
         printf("Faild to execute summond\n");
@@ -141,7 +141,7 @@ int shellCheckDaemon(char **args)
     // 3. A successful execvp never returns, while a failed execvp returns -1
     // 4. Print some kind of error message if it returns -1
     // 5. return 1 to the caller of shellCheckDaemon if execvp fails to allow loop to continue
-    int result = execvp("shellPrograms/checkdaemon", args);
+    int result = execvp("/home/lsj/shell/shellPrograms/checkdaemon", args);
     if (result == -1)
     {
         printf("Faild to execute checkdaemon\n");
@@ -205,6 +205,9 @@ int shellUsage(char **args)
 {
     int functionIndex = -1;
     // Check if the commands exist in the command list
+    if (args[1]==NULL){
+        return 0;
+    }
     for (int i = 0; i < numOfBuiltinFunctions(); i++)
     {
         if (strcmp(args[1], builtin_commands[i]) == 0)
@@ -280,22 +283,21 @@ int shellExecuteInput(char **args)
         }
     }
     // 2. Otherwise, check if args[0] is in any of our builtin_commands, and that it is NOT cd, help, exit, or usage.
-    int buildin = 0;
     if (builtin_commands[index] == "cd")
     {
-        buildin = 1;
+        return shellCD(args);
     }
     else if (builtin_commands[index] == "help")
     {
-        buildin = 1;
+        return shellHelp(args);
     }
     else if (builtin_commands[index] == "exit")
     {
-        buildin = 1;
+        return shellExit(args);
     }
     else if (builtin_commands[index] == "usage")
     {
-        buildin = 1;
+        return shellUsage(args);
     }
     // 3. If conditions in (2) are satisfied, perform fork(). Check if fork() is successful.
     if (index > 0)
@@ -322,15 +324,8 @@ int shellExecuteInput(char **args)
         // 6. Return the child's return value to the caller of shellExecuteInput
         return result;
     }
-    if (index == -2)
-    {
-        printf("Build in command:%s\n", builtin_commands[buildin]);
-    }
-    else
-    {
-        // 7. If args[0] is not in builtin_command, print out an error message to tell the user that command doesn't exist and return 1
-        printf("Invalid command received. Type help to see what commands are implemented\n");
-    }
+    // 7. If args[0] is not in builtin_command, print out an error message to tell the user that command doesn't exist and return 1
+    printf("Invalid command received. Type help to see what commands are implemented\n");
     return 1;
 }
 
@@ -411,7 +406,7 @@ void shellLoop(void)
         line = shellReadLine();
         // 4. invoke shellTokenizeInput(line) and store the output at args**
         args = shellTokenizeInput(line);
-        if (args[0] == "exit")
+        if (strcmp(args[0],"exit")==0)
         {
             break;
         }

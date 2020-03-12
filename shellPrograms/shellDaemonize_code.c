@@ -13,26 +13,60 @@
 #include "shellPrograms.h"
 
 //TODO: change to appropriate path
-char *path = "/Users/natalie_agus/Dropbox/50.005 Computer System Engineering/2020/PA1 Makeshell Daemon/PA1/logfile_test.txt";
+char *path = "/home/lsj/shell/log/log.txt";
 
 /*This function summons a daemon process out of the current process*/
 static int create_daemon()
 {
-
     /* TASK 7 */
     // Incantation on creating a daemon with fork() twice
-
     // 1. Fork() from the parent process
-    // 2. Close parent with exit(1)
-    // 3. On child process (this is intermediate process), call setsid() so that the child becomes session leader to lose the controlling TTY
-    // 4. Ignore SIGCHLD, SIGHUP
-    // 5. Fork() again, parent (the intermediate) process terminates
-    // 6. Child process (the daemon) set new file permissions using umask(0). Daemon's PPID at this point is 1 (the init)
-    // 7. Change working directory to root
-    // 8. Close all open file descriptors using sysconf(_SC_OPEN_MAX) and redirect fd 0,1,2 to /dev/null
+    pid_t pid = fork();
+    if (pid < 0)
+    {
+        fprintf(stderr, "Fork in create_daemon failed");
+    }
+    else if (pid > 0)
+    {
+        // 2. Close parent with exit(1)
+        exit(1);
+    }
+    else
+    {
+        // 3. On child process (this is intermediate process), call setsid() so that the child becomes session leader to lose the controlling TTY
+        setsid();
+        // 4. Ignore SIGCHLD, SIGHUP
+        signal(SIGCHLD, SIG_IGN);
+        signal(SIGHUP, SIG_IGN);
+        // 5. Fork() again, parent (the intermediate) process terminates
+        pid_t newpid = fork();
+        if (newpid < 0)
+        {
+            fprintf(stderr, "Fork in create_daemon second fork failed");
+        }
+        else if (newpid > 0)
+        {
+            exit(1);
+        }
+        else
+        {
+            // 6. Child process (the daemon) set new file permissions using umask(0). Daemon's PPID at this point is 1 (the init)
+            umask(0);
+            // 7. Change working directory to root
+            chdir("/");
+            // 8. Close all open file descriptors using sysconf(_SC_OPEN_MAX) and redirect fd 0,1,2 to /dev/null
+            int x;
+            for (x = sysconf(_SC_OPEN_MAX); x >= 0; x--)
+            {
+                close(x);
+            }
+            stdin = open("/dev/null", O_RDWR);
+            stdout = dup(0);
+            stderr = dup(0);
+        }
+    }
     // 9. Return to main
-
-    return 1;
+    return 0;
 }
 
 static int daemon_work()
