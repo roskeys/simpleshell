@@ -408,6 +408,7 @@ void shellLoop(void)
         args = shellTokenizeInput(line);
         if (strcmp(args[0],"exit")==0)
         {
+            status = 0;
             break;
         }
         // 5. execute the tokens using shellExecuteInput(args)
