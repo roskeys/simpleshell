@@ -206,6 +206,7 @@ int shellUsage(char **args)
     int functionIndex = -1;
     // Check if the commands exist in the command list
     if (args[1]==NULL){
+        printf("Use \"usage command\" to check the usage of a command\n");
         return 0;
     }
     for (int i = 0; i < numOfBuiltinFunctions(); i++)

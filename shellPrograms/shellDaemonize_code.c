@@ -60,9 +60,9 @@ static int create_daemon()
             {
                 close(x);
             }
-            stdin = open("/dev/null", O_RDWR);
-            stdout = dup(0);
-            stderr = dup(0);
+            int fd0 = open("/dev/null", O_RDWR);
+            int fd1 = dup(0);
+            int fd2 = dup(0);
         }
     }
     // 9. Return to main
